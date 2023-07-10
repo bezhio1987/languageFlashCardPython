@@ -1,11 +1,18 @@
 from tkinter import *
 import pandas, random, time
 
+current_card={}
 BACKGROUND_COLOR = "#B1DDC6"
 
-data = pandas.read_csv("./data/french_words.csv")
-data_dict = data.to_dict(orient="records")
-current_card={}
+
+try:
+    data = pandas.read_csv("./data/words_to_learn.csv")
+except FileNotFoundError:
+    original_data = pandas.read_csv("./data/french_words.csv")
+    data_dict = original_data.to_dict(orient="records")
+else:
+    data_dict = data.to_dict(orient="records")
+
 
 def new_card():
     global current_card, flip_timer
@@ -24,7 +31,11 @@ def flip_card():
     canvas.itemconfig(card_word, text=current_card["English"],fill="white")
     canvas.itemconfig(card_background, image=card_back_img)
 
-
+def is_known():
+    data_dict.remove(current_card)
+    data= pandas.DataFrame(data_dict)
+    data.to_csv("./data/words_to_learn.csv", index=False)
+    new_card()
 
 # --------------------------------------------------UI---------------------------------------
 
@@ -52,7 +63,7 @@ right_btn = PhotoImage(file="./images/right.png")
 wrong_button = Button(image=wrong_btn, highlightthickness=0, command=new_card)
 wrong_button.grid(row=1, column=0)
 
-right_button = Button(image=right_btn, highlightthickness=0, command=new_card)
+right_button = Button(image=right_btn, highlightthickness=0, command=is_known)
 right_button.grid(row=1, column=1)
 
 new_card()
